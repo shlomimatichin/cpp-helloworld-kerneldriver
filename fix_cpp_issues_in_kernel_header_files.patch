@@ -1,0 +1,45 @@
+diff -Naur origs/arch/x86/include/asm/spinlock.h kernelHeaders/arch/x86/include/asm/spinlock.h
+--- origs/arch/x86/include/asm/spinlock.h	2015-07-22 13:57:27.568583845 +0300
++++ kernelHeaders/arch/x86/include/asm/spinlock.h	2015-07-22 14:43:35.884056098 +0300
+@@ -101,7 +101,7 @@
+  */
+ static __always_inline void arch_spin_lock(arch_spinlock_t *lock)
+ {
+-	register struct __raw_tickets inc = { .tail = TICKET_LOCK_INC };
++	register struct __raw_tickets inc = { NULL, TICKET_LOCK_INC };
+ 
+ 	inc = xadd(&lock->tickets, inc);
+ 	if (likely(inc.head == inc.tail))
+diff -Naur origs/arch/x86/include/asm/spinlock_types.h kernelHeaders/arch/x86/include/asm/spinlock_types.h
+--- origs/arch/x86/include/asm/spinlock_types.h	2015-07-22 13:57:27.572583877 +0300
++++ kernelHeaders/arch/x86/include/asm/spinlock_types.h	2015-07-22 13:57:38.216668504 +0300
+@@ -23,12 +23,14 @@
+ 
+ #define TICKET_SHIFT	(sizeof(__ticket_t) * 8)
+ 
++struct __raw_tickets {
++    __ticket_t head, tail;
++};
++
+ typedef struct arch_spinlock {
+ 	union {
+ 		__ticketpair_t head_tail;
+-		struct __raw_tickets {
+-			__ticket_t head, tail;
+-		} tickets;
++        struct __raw_tickets tickets;
+ 	};
+ } arch_spinlock_t;
+ 
+diff -Naur origs/include/linux/timer.h kernelHeaders/include/linux/timer.h
+--- origs/include/linux/timer.h	2015-07-22 13:57:30.264605265 +0300
++++ kernelHeaders/include/linux/timer.h	2015-07-22 14:40:19.035090036 +0300
+@@ -252,7 +252,7 @@
+ extern void init_timers(void);
+ extern void run_local_timers(void);
+ struct hrtimer;
+-extern enum hrtimer_restart it_real_fn(struct hrtimer *);
++extern int it_real_fn(struct hrtimer *);
+ 
+ unsigned long __round_jiffies(unsigned long j, int cpu);
+ unsigned long __round_jiffies_relative(unsigned long j, int cpu);

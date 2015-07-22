@@ -1,0 +1,13 @@
+*.swp
+kernelHeaders
+*.tmp
+*.ko.cmd
+*.mod.o.cmd
+*.o.cmd
+.tmp_versions/
+Module.symvers
+*.ko
+*.mod.c
+*.mod.o
+*.o
+modules.order
